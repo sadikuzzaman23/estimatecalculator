@@ -20,43 +20,7 @@
 
 <body>
 
-    <!-- ── LOGIN SCREEN ── -->
-    <div id="login-screen" class="login-container">
-        <div class="glass-panel login-panel">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="login-logo-wrap">
-                    <span class="login-logo-icon">🏗️</span>
-                    <div class="login-logo-ring"></div>
-                </div>
-                <h1 style="margin-top: 1rem; font-size: 2.2rem;">SiteBuild ERP</h1>
-                <p class="header-sub" style="font-size:0.9rem; margin-top:0.3rem;">Elite Construction Management Suite
-                </p>
-            </div>
-            <form id="loginForm" class="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                <div class="input-group">
-                    <label for="loginUsername">Role</label>
-                    <select id="loginUsername" required>
-                        <option value="admin">👑 Admin (Full Access)</option>
-                        <option value="engineer">🔧 Site Engineer (Attendance Only)</option>
-                        <option value="accountant">💼 Accountant (Payments Only)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="loginPassword">Password <span style="color:var(--text-muted);font-size:0.75rem">(= role
-                            name)</span></label>
-                    <input type="password" id="loginPassword" required placeholder="Enter password">
-                </div>
-                <div id="loginErrorMsg"
-                    style="display: none; color: var(--danger); font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); padding: 0.5rem 0.8rem; border-radius: 6px; border: 1px solid rgba(239,68,68,0.3)">
-                    ❌ Invalid credentials. Use role name as password.</div>
-                <button type="submit" class="btn-primary" style="margin-top: 0.5rem; padding: 0.85rem;">
-                    🔑 Login to Dashboard
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="app" style="display: none;">
+    <div id="app">
 
         <!-- ── HEADER ── -->
         <header>
@@ -78,7 +42,6 @@
                     <span class="status-dot"></span>
                     <span class="status-text">Connecting…</span>
                 </div>
-                <button id="logoutBtn" class="btn-outline-sm" title="Logout">Logout</button>
             </div>
         </header>
 
