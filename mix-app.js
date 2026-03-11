@@ -6,7 +6,7 @@
 
 // ─── STATE ─────────────────────────────────────────────
 let currentStep = 1;
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
 let currentResults = null;
 let pieChart = null;
 let validationDebounce = null;
@@ -38,8 +38,8 @@ function showStep(n) {
     updateProgress(n);
     updateSidebarSteps(n);
     updateSidebarSummary();
-    // Build review grid on step 5
-    if (n === 5) buildReviewGrid();
+    // Build review grid on step 4
+    if (n === 4) buildReviewGrid();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -47,7 +47,7 @@ function showResultsPage() {
     document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
     const rp = document.getElementById('results-page');
     if (rp) rp.classList.add('active');
-    updateProgress(6); // past last step = full bar
+    updateProgress(5); // past last step = full bar
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Setup ERP Save Button dynamically
@@ -118,7 +118,7 @@ function showResultsPage() {
 
 function backToWizard() {
     document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
-    showStep(currentStep < 1 ? 5 : currentStep);
+    showStep(currentStep < 1 ? 4 : currentStep);
 }
 
 function updateProgress(n) {
@@ -146,10 +146,6 @@ function validateStep(n) {
     if (n === 2) {
         if (!document.getElementById('slump').value) errs.push('Please set a target slump value.');
     }
-    if (n === 3) {
-        const wc = parseFloat(document.getElementById('wc_manual').value);
-        if (!wc || wc < 0.25 || wc > 0.70) errs.push('Please enter a valid W/C ratio (0.25–0.70) from IS 10262 Figure-1.');
-    }
     return errs;
 }
 
@@ -159,13 +155,32 @@ function updateSidebarSummary() {
     const fck = g('fck') || '—';
     const exp = g('exposure') || '—';
     const sl = g('slump') || '—';
-    const wc = g('wc_manual') || '—';
     const pl = document.querySelector('input[name="placement"]:checked')?.value || '—';
+    const siteControl = document.querySelector('input[name="site_control"]:checked')?.value || 'Good';
+    const cementGrade = document.querySelector('input[name="cement_grade"]:checked')?.value || 'OPC43';
+
+    let autoWc = '—';
+    let targetFckDisplay = '—';
+    
+    if (fck !== '—' && typeof window.step1_targetStrength === 'function') {
+        const S1 = window.step1_targetStrength(fck, siteControl);
+        targetFckDisplay = S1.fck_target + " N/mm²";
+        if (typeof window.getWCFromChart === 'function') {
+            const lim = window.IS456_EXPOSURE ? window.IS456_EXPOSURE[exp] : null;
+            let chartWc = window.getWCFromChart(S1.fck_target, cementGrade);
+            if (lim && chartWc > lim.maxWC) {
+                autoWc = lim.maxWC.toFixed(2) + ' (Capped)';
+            } else {
+                autoWc = chartWc.toFixed(2) + ' (Auto)';
+            }
+        }
+    }
 
     document.getElementById('sum-grade').innerHTML = 'Grade: <strong>' + fck + '</strong>';
+    if(document.getElementById('sum-target')) document.getElementById('sum-target').innerHTML = "Target f'ck: <strong>" + targetFckDisplay + "</strong>";
     document.getElementById('sum-exposure').innerHTML = 'Exposure: <strong>' + exp + '</strong>';
     document.getElementById('sum-slump').innerHTML = 'Slump: <strong>' + sl + ' mm</strong>';
-    document.getElementById('sum-wc').innerHTML = 'W/C: <strong>' + wc + '</strong>';
+    document.getElementById('sum-wc').innerHTML = 'Auto W/C: <strong>' + autoWc + '</strong>';
     document.getElementById('sum-placement').innerHTML = 'Method: <strong>' + pl + '</strong>';
 }
 
@@ -177,23 +192,7 @@ function syncSlump(val) {
 }
 
 // ─── W/C STATUS ────────────────────────────────────────
-function updateWCStatus() {
-    const wc = parseFloat(document.getElementById('wc_manual').value);
-    const exp = document.getElementById('exposure').value;
-    const lim = IS456_EXPOSURE[exp];
-    const el = document.getElementById('wc-status');
-    if (!el) return;
-    if (!wc) { el.textContent = 'Enter the W/C value from the IS 10262 Figure-1 chart.'; el.className = 'wc-status'; return; }
-    if (!lim) { el.textContent = `W/C = ${wc} entered.`; el.className = 'wc-status'; return; }
-    if (wc <= lim.maxWC) {
-        el.textContent = `✓ W/C = ${wc} — within IS 456 limit of ${lim.maxWC} for ${exp} exposure.`;
-        el.className = 'wc-status ok';
-    } else {
-        el.textContent = `⚠ W/C = ${wc} exceeds IS 456 limit of ${lim.maxWC}. Will be capped to ${lim.maxWC}.`;
-        el.className = 'wc-status warn';
-    }
-    updateSidebarSummary();
-}
+// W/C is now automatically derived; manual update removed.
 
 // ─── EXPOSURE BANNER ───────────────────────────────────
 function updateExposureBanner() {
@@ -218,14 +217,13 @@ function readInputs() {
         slump: parseFloat(g('slump').value) || 100,
         placement: document.querySelector('input[name="placement"]:checked')?.value || 'Pump',
         cementGrade: document.querySelector('input[name="cement_grade"]:checked')?.value || 'OPC43',
-        wc_manual: parseFloat(g('wc_manual')?.value) || 0.45,
+        wc_manual: null, // Logic engine automates this
         sg_cement: parseFloat(g('sg_cement').value) || 3.15,
         sg_admix: parseFloat(g('sg_admix').value) || 1.21,
         sg_ca: parseFloat(g('sg_ca').value) || 2.72,
         sg_fa: parseFloat(g('sg_fa').value) || 2.65,
         faZone: g('fa_zone').value || 'zone_3',
-        admixDosagePct: parseFloat(g('admix_dosage').value) || 1.2,
-        admixReductionPct: parseFloat(g('admix_reduction').value) || 25,
+        // admixDosagePct & admixReductionPct NOT read from DOM — engine computes them per IS 10262:2019 Cl.5.3.2
     };
 }
 
@@ -233,17 +231,32 @@ function readInputs() {
 function buildReviewGrid() {
     const inp = readInputs();
     const lim = IS456_EXPOSURE[inp.exposure] || {};
-    const wcWarn = inp.wc_manual > (lim.maxWC || 1);
+    
+    let finalWc = 'Auto Computed';
+    let wcWarn = false;
+    let targetFckStr = '—';
+    if (typeof step1_targetStrength !== 'undefined') {
+        const S1 = step1_targetStrength(inp.grade, inp.siteControl);
+        targetFckStr = `${S1.fck_target} N/mm²`;
+        const chartWc = getWCFromChart(S1.fck_target, inp.cementGrade);
+        if (lim.maxWC && chartWc > lim.maxWC) {
+            finalWc = lim.maxWC.toFixed(2);
+            wcWarn = true;
+        } else {
+            finalWc = chartWc.toFixed(2);
+        }
+    }
 
     const items = [
         { label: 'Grade', val: inp.grade, sub: 'Characteristic strength' },
+        { label: "Target f'ck", val: targetFckStr, sub: "f'ck = fck + 1.65×s" },
         { label: 'Exposure', val: inp.exposure, sub: 'IS 456 Table-3' },
         { label: 'Site Control', val: inp.siteControl, sub: 'Std deviation modifier' },
         { label: 'Target Slump', val: inp.slump + ' mm', sub: `${Math.max(0, inp.slump <= 75 ? 0 : Math.floor((inp.slump - 75) / 25))} steps above 50mm` },
         { label: 'Placement', val: inp.placement, sub: inp.placement === 'Pump' ? 'CA reduced 10%' : 'No CA reduction' },
         { label: 'Cement Grade', val: inp.cementGrade, sub: 'For IS 10262 chart' },
-        { label: 'W/C Ratio', val: inp.wc_manual, sub: lim.maxWC ? `IS 456 max: ${lim.maxWC}` : 'From IS 10262 Fig-1', warn: wcWarn },
-        { label: 'Admixture', val: inp.admixDosagePct + '%', sub: `${inp.admixReductionPct}% water reduction` },
+        { label: 'W/C Ratio', val: finalWc, sub: wcWarn && lim.maxWC ? `Capped to IS 456 max: ${lim.maxWC}` : 'IS 10262 Fig-1 Chart (Auto)', warn: wcWarn },
+        { label: '⚗ Admixture', val: '— Auto', sub: 'Dosage & water reduction computed by engine (IS 10262 Cl.5.3.2)', badge: 'auto' },
         { label: 'FA Zone', val: inp.faZone.replace('_', ' '), sub: 'IS 383 grading zone' },
         { label: 'SG Cement', val: inp.sg_cement, sub: 'Specific gravity' },
         { label: 'SG CA / FA', val: `${inp.sg_ca} / ${inp.sg_fa}`, sub: 'Coarse / Fine agg.' },
@@ -251,7 +264,7 @@ function buildReviewGrid() {
     ];
 
     document.getElementById('review-grid').innerHTML = items.map(it =>
-        `<div class="rv-card${it.warn ? ' warn-card' : ''}">
+        `<div class="rv-card${it.warn ? ' warn-card' : ''}${it.badge === 'auto' ? ' auto-card' : ''}">
        <div class="rv-label">${it.label}</div>
        <div class="rv-val">${it.val}</div>
        <div class="rv-sub">${it.sub}</div>
@@ -261,7 +274,7 @@ function buildReviewGrid() {
 
 // ─── GENERATE REPORT ──────────────────────────────────
 function generateReport() {
-    const errs = validateStep(3).concat(validateStep(1)); // ensure key steps are valid
+    const errs = validateStep(1).concat(validateStep(2)); // ensure key steps are valid
     if (errs.length) { errs.forEach(e => showToast('warn', '⚠', e)); return; }
 
     const overlay = document.getElementById('analysis-overlay');
@@ -319,6 +332,14 @@ function populateResultsPage(r, inputs) {
     document.getElementById('res-cement').textContent = S4.cement_adopted.toFixed(1);
     document.getElementById('res-ca').textContent = S6.massCA;
     document.getElementById('res-fa').textContent = S6.massFA;
+
+    // Hero panel — Material Requirements per m³
+    document.getElementById('res-mh-cement').textContent = S4.cement_adopted.toFixed(1);
+    document.getElementById('res-mh-water').textContent  = S3.actualWater.toFixed(1);
+    document.getElementById('res-mh-fa').textContent     = S6.massFA.toFixed(1);
+    document.getElementById('res-mh-ca').textContent     = S6.massCA.toFixed(1);
+    document.getElementById('res-mh-admix').textContent  = S6.massAdmix.toFixed(2);
+    document.getElementById('res-mh-wc').textContent     = S2.wc_adopted;
 
     // Ratio
     document.getElementById('ratio-display').textContent = `1 : ${S2.wc_adopted} : ${S6.ratioFA} : ${S6.ratioCA}`;
@@ -388,8 +409,16 @@ function buildAccordion(r) {
         },
         {
             num: '03', title: 'Water Content', result: `${S3.actualWater} kg/m³`,
-            formula: `Base=${S3.baseWater} kg | Steps=${S3.slumpSteps}×25mm → +${S3.increasePercent}% | Admix −${S3.admixReductionPct}%`,
-            rows: [['Base water (20mm, 50mm slump)', S3.baseWater + ' kg'], ['Slump steps above 50mm', S3.slumpSteps + ' × 25mm = +' + S3.increasePercent + '%'], ['After slump adj.', S3.adjustedWater + ' kg'], ['After admix reduction', S3.actualWater + ' kg']]
+            formula: `Base=${S3.baseWater} kg | Steps=${S3.slumpSteps}×25mm → +${S3.increasePercent}% | SP ${S3.admixReductionPct}% W↓ (auto)`,
+            rows: [
+                ['Base water (20mm, 50mm slump)', S3.baseWater + ' kg'],
+                ['Slump steps above 50mm', S3.slumpSteps + ' × 25mm = +' + S3.increasePercent + '%'],
+                ['After slump adj.', S3.adjustedWater + ' kg'],
+                ['SP water reduction', S3.admixReductionPct + '% — engine computed per IS 10262 Cl.5.3.2'],
+                ['After SP reduction', S3.actualWater + ' kg'],
+                ['SP dosage (% cement)', (S3.admixDosagePct ?? '?') + '% — engine computed'],
+                ['Basis', S3.admixBasis || 'IS 10262:2019 · IS 9103:1999']
+            ]
         },
         {
             num: '04', title: 'Cement Content', result: `${S4.cement_adopted.toFixed(1)} kg/m³`,
@@ -476,16 +505,12 @@ function loadTestCase(num) {
     radio('placement', tc.placement);
     radio('cement_grade', tc.cementGrade);
 
-    document.getElementById('wc_manual').value = tc.wc_manual;
-    updateWCStatus();
-
     document.getElementById('sg_cement').value = tc.sg_cement;
     document.getElementById('sg_admix').value = tc.sg_admix;
     document.getElementById('sg_ca').value = tc.sg_ca;
     document.getElementById('sg_fa').value = tc.sg_fa;
     document.getElementById('fa_zone').value = tc.faZone;
-    document.getElementById('admix_dosage').value = tc.admixDosagePct;
-    document.getElementById('admix_reduction').value = tc.admixReductionPct;
+    // Note: admix_dosage & admix_reduction no longer exist as inputs — engine computes them.
 
     // FA zone radio
     document.querySelectorAll('input[name="fa_zone_r"]').forEach(r => {
@@ -518,10 +543,6 @@ function resetAll() {
     // Clear exposure
     document.getElementById('exposure').value = '';
     document.getElementById('exposure-limits').style.display = 'none';
-    // Clear W/C
-    document.getElementById('wc_manual').value = '';
-    const ws = document.getElementById('wc-status');
-    if (ws) { ws.textContent = 'Enter the W/C value from the IS 10262 Figure-1 chart.'; ws.className = 'wc-status'; }
     // Slump
     syncSlump(100);
     document.getElementById('slump-range').value = 100;
@@ -650,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exposure change
     document.getElementById('exposure')?.addEventListener('change', () => {
         updateExposureBanner();
-        updateWCStatus();
+        updateSidebarSummary(); // W/C depends on exposure limits
     });
 
     // Always start on step 1

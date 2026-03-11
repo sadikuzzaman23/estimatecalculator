@@ -3,6 +3,13 @@
  * IS 10262:2019 · IS 456:2000
  * All 6 steps implemented as pure functions.
  * Reference test case: M40, Moderate, Slump=180mm gives f'ck=48.25, C=446, W=156
+ *
+ * NOTE — Admixture (Superplasticizer) Policy:
+ *   Per IS 10262:2019 Cl. 5.3.2 and IS 9103:1999:
+ *   - Dosage is determined by the ENGINEER based on cement content & exposure;
+ *     the user does NOT input dosage — the engine computes it.
+ *   - Water reduction % is a FIXED product property (~20–25%).
+ *   Both are OUTPUTS shown in results, not wizard inputs.
  */
 
 // ─── LOOKUP TABLES ──────────────────────────────────────────────────────────
@@ -56,6 +63,47 @@ const BASE_WATER_20MM = 186;
 
 // IS 10262:2019 Table-3 — Entrapped air for 20mm CA
 const AIR_CONTENT_20MM = 0.01; // 1%
+
+// ─── ADMIXTURE AUTO-COMPUTATION ──────────────────────────────────────────────
+/**
+ * Determines superplasticizer (SP) parameters automatically per IS 10262:2019
+ * Cl. 5.3.2 and IS 9103:1999 (Admixtures for Concrete).
+ *
+ * LOGIC:
+ *   Water reduction % is a PRODUCT property (not design input). Standard SPs
+ *   give 20–25% water reduction. Higher grades (≥M35) benefit from maximum 25%.
+ *
+ *   Dosage % of cement is typically 0.5–1.5% by mass (manufacturer data).
+ *   IS 10262 leaves dosage to engineer determination; we apply:
+ *     M15–M25 → 0.8% (moderate workability, normal cement content)
+ *     M30–M35 → 1.0% (moderate-high strength, balanced)
+ *     M40–M45 → 1.2% (high strength, needs better dispersion)
+ *     M50+    → 1.5% (very high strength, dense matrix)
+ *   These are conservative mid-range values per IS 9103 practical guidance.
+ *
+ * @param {string} grade      e.g. "M40"
+ * @param {string} exposure   e.g. "Moderate"
+ * @returns {{ dosagePct: number, waterReductionPct: number, basis: string }}
+ */
+function computeAdmixParams(grade, exposure) {
+  const fck = parseInt(grade.replace('M', '')) || 30;
+
+  // Dosage (% by mass of cement)
+  let dosagePct;
+  if (fck <= 25)       dosagePct = 0.8;
+  else if (fck <= 35)  dosagePct = 1.0;
+  else if (fck <= 45)  dosagePct = 1.2;
+  else                  dosagePct = 1.5;
+
+  // Water reduction % — IS 9103:1999 range 5–40%; practical SP range 20–25%
+  // Higher grades / severe exposure → use higher reduction to minimise water.
+  const severeExposures = ['Severe', 'Very Severe', 'Extreme'];
+  const waterReductionPct = (fck >= 35 || severeExposures.includes(exposure)) ? 25 : 20;
+
+  const basis = `IS 10262:2019 Cl.5.3.2 · IS 9103: ${dosagePct}% SP (${waterReductionPct}% water reduction)`;
+
+  return { dosagePct, waterReductionPct, basis };
+}
 
 // W/C ratio from IS 10262 design chart (f'ck → W/C for different cement grades)
 // Polynomial curve-fit approximation of IS 10262 Figure-1
@@ -123,9 +171,9 @@ function step2_wcRatio(wc_manual, exposure) {
 
 // ─── STEP 3: WATER CONTENT ────────────────────────────────────────────────────
 /**
- * @param {number} slump mm
- * @param {number} admixReductionPct  e.g. 25 for 25%
- * @returns {{ baseWater, adjustedWater, actualWater, slumpSteps, increasePercent }}
+ * @param {number} slump  mm
+ * @param {number} admixReductionPct  Water reduction % from computeAdmixParams (NOT a user input)
+ * @returns {{ baseWater, adjustedWater, actualWater, slumpSteps, increasePercent, admixReductionPct }}
  */
 function step3_waterContent(slump, admixReductionPct) {
   // ─── IS 10262:2019 Table-4 ────────────────────────────────────────────────
@@ -249,7 +297,8 @@ function step6_absoluteVolume(p) {
   const {
     cement, water,
     sg_cement, sg_admix, sg_ca, sg_fa,
-    admixDosagePct, finalCA, finalFA
+    admixDosagePct,   // Computed by engine via computeAdmixParams — NOT a user input
+    finalCA, finalFA
   } = p;
 
   // Use RAW floats for all intermediate calculations to avoid rounding accumulation.
@@ -318,12 +367,18 @@ function runMixDesign(inputs) {
     grade, exposure, siteControl, slump,
     placement, cementGrade,
     sg_cement, sg_admix, sg_ca, sg_fa,
-    faZone, admixDosagePct, admixReductionPct
+    faZone
+    // NOTE: admixDosagePct & admixReductionPct are NOT accepted from inputs.
+    // They are COMPUTED by the engine below per IS 10262:2019 Cl. 5.3.2.
   } = inputs;
 
+  // ── Auto-compute admixture parameters (IS 10262:2019 Cl. 5.3.2 / IS 9103) ──
+  const admixParams = computeAdmixParams(grade, exposure);
+
   const S1 = step1_targetStrength(grade, siteControl);
-  const S2 = step2_wcRatio(inputs.wc_manual || 0.35, exposure);
-  const S3 = step3_waterContent(slump, admixReductionPct);
+  const computedWc = inputs.wc_manual || getWCFromChart(S1.fck_target, cementGrade);
+  const S2 = step2_wcRatio(computedWc, exposure);
+  const S3 = step3_waterContent(slump, admixParams.waterReductionPct);
   const S4 = step4_cementContent(S3.actualWater, S2.wc_adopted, exposure);
   const S5 = step5_aggregateProportions(faZone, S2.wc_adopted, placement);
   const S6 = step6_absoluteVolume({
@@ -331,10 +386,14 @@ function runMixDesign(inputs) {
     water: S3.actualWater,
     wc: S2.wc_adopted,
     sg_cement, sg_admix, sg_ca, sg_fa,
-    admixDosagePct,
+    admixDosagePct: admixParams.dosagePct,   // Engine-computed, not user input
     finalCA: S5.finalCA,
     finalFA: S5.finalFA
   });
 
-  return { S1, S2, S3, S4, S5, S6, inputs };
+  // Attach admix params to S3 for results display
+  S3.admixDosagePct   = admixParams.dosagePct;
+  S3.admixBasis       = admixParams.basis;
+
+  return { S1, S2, S3, S4, S5, S6, inputs, admixParams };
 }

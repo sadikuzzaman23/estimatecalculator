@@ -1,4 +1,4 @@
-﻿import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 // ── SUPABASE CONF ──
 const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || 'https://iplgwdzvkrwhsacapzuq.supabase.co';
@@ -29,6 +29,8 @@ let faceApiLoaded = false;
 // ── DOM ELEMENTS: SIDEBAR & MIX DESIGN ──
 const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
+const mobileSidebarClose = document.getElementById('mobileSidebarClose');
 const mainLayout = document.getElementById('mainLayout');
 
 // Mobile Menu Toggle
@@ -43,6 +45,31 @@ if (mobileMenuBtn && sidebar) {
         if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target)) {
             sidebar.classList.remove('open');
         }
+    });
+}
+
+if (mobileSidebarClose && sidebar) {
+    mobileSidebarClose.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+    });
+}
+
+// Desktop Sidebar Toggle
+if (desktopSidebarToggle && sidebar) {
+    desktopSidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        // trigger resize event to re-render charts
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 300);
+    });
+}
+
+// ── MIX WIZARD BACK BUTTON ──
+const backToErpBtn = document.getElementById('backToErpBtn');
+if (backToErpBtn) {
+    backToErpBtn.addEventListener('click', () => {
+        // Trigger a click on the dashboard tab to navigate away
+        const dashBtn = document.querySelector('.tab-btn[data-tab="dashboard"]');
+        if(dashBtn) dashBtn.click();
     });
 }
 let state = {
@@ -230,7 +257,14 @@ navTabs.forEach(btn => {
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'analytics') renderAnalytics();
-        if (btn.dataset.tab === 'mix-design') calculateMixDesign(); // Run initial calc on open
+        if (btn.dataset.tab === 'mix-design' && typeof calculateMixDesign === 'function') calculateMixDesign(); // Run initial calc on open
+
+        // Isolate the mix design wizard by hiding the main app frame
+        if (btn.dataset.tab === 'mix-design') {
+            document.body.classList.add('mix-wizard-active');
+        } else {
+            document.body.classList.remove('mix-wizard-active');
+        }
 
         // Auto close sidebar on mobile if opened
         if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
