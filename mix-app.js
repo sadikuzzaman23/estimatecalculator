@@ -557,10 +557,21 @@ function resetAll() {
 
 // ─── GRADE BUTTONS ─────────────────────────────────────
 function bindGradeButtons() {
-    sel('.grade-btn', btn => btn.addEventListener('click', () => {
+    sel('.grade-btn', btn => btn.addEventListener('click', (e) => {
+        // Prevent default form submission or bubbling that might cause re-renders
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Clear all active classes
         sel('.grade-btn', b => b.classList.remove('active'));
+        
+        // Add active class to clicked button
         btn.classList.add('active');
-        document.getElementById('fck').value = btn.dataset.val;
+        
+        // Update hidden input and sidebar
+        const fckInput = document.getElementById('fck');
+        if (fckInput) fckInput.value = btn.dataset.val;
+        
         updateSidebarSummary();
     }));
 }
