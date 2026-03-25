@@ -248,6 +248,7 @@
 #tab-mix-design .wizard-shell {
   display: flex;
   min-height: 100vh;
+  background: var(--bg);
 }
 
 /* ── SIDEBAR ──────────────────────────────────────────── */
@@ -328,6 +329,34 @@
   font-size: 11px;
   font-weight: 700;
   color: rgba(255, 255, 255, .4)
+}
+
+/* BACK TO ERP BUTTON */
+#tab-mix-design .btn-back-erp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--r-sm);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+#tab-mix-design .btn-back-erp:hover {
+  background: rgba(255, 143, 0, 0.15);
+  border-color: rgba(255, 143, 0, 0.3);
+  color: var(--acc);
+  opacity: 1;
 }
 
 #tab-mix-design .ss-label {
@@ -454,7 +483,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-height: 100vh;
+  height: 100vh;
   overflow-y: auto;
   position: relative;
 }
@@ -517,7 +546,7 @@
 #tab-mix-design .step-title {
   font-size: 28px;
   font-weight: 800;
-  color: var(--pr);
+  color: var(--txt);
   line-height: 1.15;
   margin-bottom: 10px
 }
@@ -529,7 +558,7 @@
   line-height: 1.65
 }
 
-#tab-mix-design .step-.wizard-body-fake {
+#tab-mix-design .step-body-fake {
   flex: 1
 }
 
@@ -538,7 +567,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 40px;
+  margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid var(--border);
 }
@@ -717,7 +746,8 @@
 /* OPTION CARDS */
 #tab-mix-design .option-cards {
   display: flex;
-  gap: 10px
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 #tab-mix-design .opt-card {
@@ -894,7 +924,6 @@
   font-weight: 600
 }
 
-#tab-mix-design .wc-enter-block {}
 
 #tab-mix-design .wc-big-input {
   width: 100%;
@@ -1196,7 +1225,7 @@
   font-family: var(--mono);
   font-size: 18px;
   font-weight: 700;
-  color: var(--pr)
+  color: var(--acc)
 }
 
 #tab-mix-design .rv-sub {
@@ -1563,7 +1592,7 @@
 #tab-mix-design .step-title-acc {
   font-size: 13px;
   font-weight: 600;
-  color: var(--pr);
+  color: var(--txt);
   flex: 1
 }
 
@@ -1752,7 +1781,7 @@
   }
 
   .grade-grid {
-    grid-template-columns: repeat(5, 1fr)
+    grid-template-columns: repeat(3, 1fr)
   }
 
   .r-summary-row {
@@ -1776,3 +1805,188 @@
     grid-template-columns: 1fr
   }
 }
+
+/* ── ADMIXTURE INFO CARD (replaces former user inputs in Step 3) ─────────── */
+#tab-mix-design .admix-info-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, rgba(255,143,0,.08), rgba(62,39,35,.06));
+  border: 1.5px solid rgba(255,143,0,.25);
+  border-radius: var(--r-md);
+  margin-top: 4px;
+}
+
+#tab-mix-design .admix-info-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  filter: drop-shadow(0 0 6px rgba(255,143,0,.4));
+}
+
+#tab-mix-design .admix-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#tab-mix-design .admix-info-text strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acc);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+#tab-mix-design .admix-info-text span {
+  font-size: 11px;
+  color: var(--txt-sec);
+  line-height: 1.55;
+}
+
+#tab-mix-design .admix-info-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+#tab-mix-design .admix-chip {
+  font-size: 10px;
+  font-family: var(--mono);
+  background: rgba(255,143,0,.12);
+  border: 1px solid rgba(255,143,0,.22);
+  border-radius: 100px;
+  padding: 3px 9px;
+  color: var(--acc-lt);
+  white-space: nowrap;
+}
+
+/* ── AUTO-CARD in Review Grid (engine-computed admixture card) ─────────────── */
+#tab-mix-design .rv-card.auto-card {
+  border-color: rgba(255,143,0,.35);
+  background: rgba(255,143,0,.06);
+}
+
+#tab-mix-design .rv-card.auto-card .rv-val {
+  color: var(--acc);
+  font-style: italic;
+  font-size: 12px;
+}
+
+#tab-mix-design .rv-card.auto-card .rv-sub {
+  color: rgba(255,143,0,.65);
+}
+
+/* ══════════════════════════════════════════════════════
+   MATERIAL REQUIREMENTS HERO PANEL  (#r-materials-hero)
+   ══════════════════════════════════════════════════════ */
+#tab-mix-design #r-materials-hero {
+  margin: 28px 0 24px;
+  padding: 24px 28px 28px;
+  background: linear-gradient(135deg, rgba(62,39,35,.55) 0%, rgba(44,28,24,.75) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+  backdrop-filter: blur(6px);
+}
+
+#tab-mix-design .mh-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--acc);
+  margin-bottom: 20px;
+}
+
+#tab-mix-design .mh-subtitle {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--txt-mute);
+  letter-spacing: .08em;
+  margin-left: 8px;
+  text-transform: none;
+}
+
+#tab-mix-design .mh-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  #tab-mix-design .mh-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  #tab-mix-design .mh-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+#tab-mix-design .mh-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 14px 18px;
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-top-width: 3px;
+  text-align: center;
+  transition: transform .2s, box-shadow .2s;
+  gap: 4px;
+}
+
+#tab-mix-design .mh-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+
+/* Per-card accent colours */
+#tab-mix-design .mh-card.mh-cement  { border-top-color: #E8D5C4; }
+#tab-mix-design .mh-card.mh-water   { border-top-color: #5b8dd9; }
+#tab-mix-design .mh-card.mh-fa      { border-top-color: #D4A574; }
+#tab-mix-design .mh-card.mh-ca      { border-top-color: #8D6E63; }
+#tab-mix-design .mh-card.mh-admix   { border-top-color: #9575CD; }
+#tab-mix-design .mh-card.mh-wc      { border-top-color: var(--acc); }
+
+#tab-mix-design .mh-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+#tab-mix-design .mh-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .10em;
+  color: var(--txt-mute);
+  margin-bottom: 6px;
+}
+
+#tab-mix-design .mh-value {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--txt);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+#tab-mix-design .mh-card.mh-wc .mh-value {
+  color: var(--acc);
+}
+
+#tab-mix-design .mh-unit {
+  font-size: 10px;
+  color: var(--txt-mute);
+  font-family: var(--mono);
+  letter-spacing: .06em;
+}
+

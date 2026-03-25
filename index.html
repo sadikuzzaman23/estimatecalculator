@@ -624,7 +624,7 @@
                 <!-- ══════════════════════════════════════════
              TAB: MIX DESIGN CALCULATOR — MixMaster Pro
         ══════════════════════════════════════════ -->
-                <div id="tab-mix-design" class="tab-content" style="padding:0; background:transparent;">
+                <div id="tab-mix-design" class="tab-content" style="padding:0; background:transparent; overflow:hidden;">
 
                     <!-- TOAST (inside tab so it's scoped) -->
                     <div id="toast-container" aria-live="polite"></div>
@@ -653,8 +653,7 @@
                     <div class="wizard-shell">
 
                         <!-- LEFT SIDEBAR -->
-                        <aside class="wizard-sidebar">
-                            <div class="sidebar-brand">
+                        <aside class="wizard-sidebar">`n                            <button id="backToErpBtn" class="btn-back-erp" title="Return to ERP Dashboard">`n                                <span>? Back to ERP</span>`n                            </button>`n                            <div class="sidebar-brand">
                                 <div class="brand-logo">⚗</div>
                                 <div class="brand-name">MixMaster<br><span>Pro</span></div>
                             </div>
@@ -673,16 +672,11 @@
                                 <div class="ss-connector"></div>
                                 <div class="ss-item" data-step="3">
                                     <div class="ss-dot"><span>3</span></div>
-                                    <div class="ss-label">W/C Ratio</div>
+                                    <div class="ss-label">Materials</div>
                                 </div>
                                 <div class="ss-connector"></div>
                                 <div class="ss-item" data-step="4">
                                     <div class="ss-dot"><span>4</span></div>
-                                    <div class="ss-label">Materials</div>
-                                </div>
-                                <div class="ss-connector"></div>
-                                <div class="ss-item" data-step="5">
-                                    <div class="ss-dot"><span>5</span></div>
                                     <div class="ss-label">Generate Report</div>
                                 </div>
                             </nav>
@@ -690,9 +684,10 @@
                             <div class="sidebar-summary" id="sidebar-summary">
                                 <div class="ss-sum-title">Current Design</div>
                                 <div class="ss-sum-row" id="sum-grade">Grade: <strong>—</strong></div>
+                                <div class="ss-sum-row" id="sum-target">Target f'ck: <strong>—</strong></div>
                                 <div class="ss-sum-row" id="sum-exposure">Exposure: <strong>—</strong></div>
                                 <div class="ss-sum-row" id="sum-slump">Slump: <strong>—</strong></div>
-                                <div class="ss-sum-row" id="sum-wc">W/C: <strong>—</strong></div>
+                                <div class="ss-sum-row" id="sum-wc">Auto W/C: <strong>—</strong></div>
                                 <div class="ss-sum-row" id="sum-placement">Method: <strong>—</strong></div>
                             </div>
 
@@ -714,7 +709,7 @@
                             <!-- STEP 1: GRADE & EXPOSURE -->
                             <div class="wizard-step active" id="step-1">
                                 <div class="step-header">
-                                    <div class="step-eyebrow">Step 1 of 5</div>
+                                    <div class="step-eyebrow">Step 1 of 4</div>
                                     <h1 class="step-title">Concrete Grade &amp; Exposure</h1>
                                     <p class="step-desc">Select the characteristic compressive strength and site
                                         exposure condition as per IS 456:2000.</p>
@@ -723,16 +718,16 @@
                                     <div class="form-section">
                                         <label class="form-label">Characteristic Strength (f<sub>ck</sub>)</label>
                                         <div class="grade-grid" id="grade-selector">
-                                            <button class="grade-btn" data-val="M15">M15</button>
-                                            <button class="grade-btn" data-val="M20">M20</button>
-                                            <button class="grade-btn" data-val="M25">M25</button>
-                                            <button class="grade-btn" data-val="M30">M30</button>
-                                            <button class="grade-btn" data-val="M35">M35</button>
-                                            <button class="grade-btn" data-val="M40">M40</button>
-                                            <button class="grade-btn" data-val="M45">M45</button>
-                                            <button class="grade-btn" data-val="M50">M50</button>
-                                            <button class="grade-btn" data-val="M55">M55</button>
-                                            <button class="grade-btn" data-val="M60">M60</button>
+                                            <button type="button" class="grade-btn" data-val="M15">M15</button>
+                                            <button type="button" class="grade-btn" data-val="M20">M20</button>
+                                            <button type="button" class="grade-btn" data-val="M25">M25</button>
+                                            <button type="button" class="grade-btn" data-val="M30">M30</button>
+                                            <button type="button" class="grade-btn" data-val="M35">M35</button>
+                                            <button type="button" class="grade-btn" data-val="M40">M40</button>
+                                            <button type="button" class="grade-btn" data-val="M45">M45</button>
+                                            <button type="button" class="grade-btn" data-val="M50">M50</button>
+                                            <button type="button" class="grade-btn" data-val="M55">M55</button>
+                                            <button type="button" class="grade-btn" data-val="M60">M60</button>
                                         </div>
                                         <input type="hidden" id="fck" value="" />
                                     </div>
@@ -784,7 +779,7 @@
                             <!-- STEP 2: WORKABILITY -->
                             <div class="wizard-step" id="step-2">
                                 <div class="step-header">
-                                    <div class="step-eyebrow">Step 2 of 5</div>
+                                    <div class="step-eyebrow">Step 2 of 4</div>
                                     <h1 class="step-title">Workability &amp; Placement</h1>
                                     <p class="step-desc">Set the target slump, placement method, and cement grade.</p>
                                 </div>
@@ -851,70 +846,18 @@
                                 <div class="step-footer">
                                     <button class="btn-back" onclick="goBack()"><span class="btn-arrow">←</span> Grade
                                         &amp; Exposure</button>
-                                    <button class="btn-next" onclick="goNext()">Next: W/C Ratio <span
-                                            class="btn-arrow">→</span></button>
-                                </div>
-                            </div>
-
-                            <!-- STEP 3: W/C RATIO -->
-                            <div class="wizard-step" id="step-3">
-                                <div class="step-header">
-                                    <div class="step-eyebrow">Step 3 of 5</div>
-                                    <h1 class="step-title">Free W/C Ratio</h1>
-                                    <p class="step-desc">Enter the W/C ratio from IS 10262:2019 Figure-1.</p>
-                                </div>
-                                <div class="step-body">
-                                    <div class="wc-input-hero">
-                                        <div class="wc-chart-hint">
-                                            <div class="wc-chart-icon">📊</div>
-                                            <div class="wc-chart-text"><strong>How to read the chart:</strong><br>Find
-                                                your <em>f'ck (target mean strength)</em> on the X-axis.<br>Read the W/C
-                                                value from the curve for your cement grade.</div>
-                                        </div>
-                                        <div class="wc-enter-block">
-                                            <label class="form-label" for="wc_manual">W/C Ratio from IS 10262
-                                                Figure-1</label>
-                                            <input type="number" id="wc_manual" class="wc-big-input" placeholder="0.45"
-                                                step="0.01" min="0.28" max="0.65" oninput="updateWCStatus()" />
-                                            <div class="wc-status" id="wc-status">Enter the W/C value from the chart
-                                                above →</div>
-                                        </div>
-                                    </div>
-                                    <div class="wc-guide-row">
-                                        <div class="wc-guide-card">
-                                            <div class="wg-label">Typical W/C for OPC 43</div>
-                                            <div class="wg-vals">
-                                                <span>M25 → ~0.55</span><span>M30 → ~0.50</span>
-                                                <span>M35 → ~0.45</span><span>M40 → ~0.40</span>
-                                                <span>M45 → ~0.37</span><span>M50 → ~0.34</span>
-                                            </div>
-                                        </div>
-                                        <div class="wc-guide-card">
-                                            <div class="wg-label">IS 456 Maximum W/C <span
-                                                    class="ref-tag">Table-5</span></div>
-                                            <div class="wg-vals">
-                                                <span>Mild → 0.55</span><span>Moderate → 0.50</span>
-                                                <span>Severe → 0.45</span><span>V. Severe → 0.45</span>
-                                                <span>Extreme → 0.40</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="step-footer">
-                                    <button class="btn-back" onclick="goBack()"><span class="btn-arrow">←</span>
-                                        Workability</button>
                                     <button class="btn-next" onclick="goNext()">Next: Materials <span
                                             class="btn-arrow">→</span></button>
                                 </div>
                             </div>
 
-                            <!-- STEP 4: MATERIAL PROPERTIES -->
-                            <div class="wizard-step" id="step-4">
+                            <!-- STEP 3: MATERIAL PROPERTIES -->
+                            <div class="wizard-step" id="step-3">
                                 <div class="step-header">
-                                    <div class="step-eyebrow">Step 4 of 5</div>
+                                    <div class="step-eyebrow">Step 3 of 4</div>
                                     <h1 class="step-title">Material Properties</h1>
                                     <p class="step-desc">Specific gravities determine component volumes via the absolute
-                                        volume method.</p>
+                                        volume method (IS 10262:2019 Cl.5.6).</p>
                                 </div>
                                 <div class="step-body">
                                     <div class="form-row-2">
@@ -922,73 +865,69 @@
                                             <label class="form-label">Specific Gravities</label>
                                             <div class="sg-list">
                                                 <div class="sg-row-w">
-                                                    <div class="sg-icon-label">🏗 Cement</div><input type="number"
-                                                        id="sg_cement" value="3.15" step="0.01" min="2.8" max="3.3"
-                                                        class="sg-num" />
+                                                    <div class="sg-icon-label">🏗 Cement</div>
+                                                    <input type="number" id="sg_cement" value="3.15" step="0.01" min="2.8" max="3.3" class="sg-num" />
                                                 </div>
                                                 <div class="sg-row-w">
-                                                    <div class="sg-icon-label">🪨 Coarse Agg</div><input type="number"
-                                                        id="sg_ca" value="2.72" step="0.01" min="2.4" max="3.0"
-                                                        class="sg-num" />
+                                                    <div class="sg-icon-label">🪨 Coarse Agg</div>
+                                                    <input type="number" id="sg_ca" value="2.72" step="0.01" min="2.4" max="3.0" class="sg-num" />
                                                 </div>
                                                 <div class="sg-row-w">
-                                                    <div class="sg-icon-label">🏖 Fine Agg</div><input type="number"
-                                                        id="sg_fa" value="2.65" step="0.01" min="2.4" max="2.9"
-                                                        class="sg-num" />
+                                                    <div class="sg-icon-label">🏖 Fine Agg</div>
+                                                    <input type="number" id="sg_fa" value="2.65" step="0.01" min="2.4" max="2.9" class="sg-num" />
                                                 </div>
                                                 <div class="sg-row-w">
-                                                    <div class="sg-icon-label">⚗ Admixture</div><input type="number"
-                                                        id="sg_admix" value="1.21" step="0.01" min="1.0" max="1.5"
-                                                        class="sg-num" />
+                                                    <div class="sg-icon-label">⚗ Admixture</div>
+                                                    <input type="number" id="sg_admix" value="1.21" step="0.01" min="1.0" max="1.5" class="sg-num" />
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="form-section">
-                                            <label class="form-label" for="fa_zone">FA Grading Zone <span
-                                                    class="ref-tag">IS 383</span></label>
+                                            <label class="form-label" for="fa_zone">FA Grading Zone <span class="ref-tag">IS 383</span></label>
                                             <div class="zone-options">
-                                                <label class="zone-card"><input type="radio" name="fa_zone_r"
-                                                        value="zone_1" /><span>Zone
-                                                        I</span><small>Coarse</small></label>
-                                                <label class="zone-card"><input type="radio" name="fa_zone_r"
-                                                        value="zone_2" /><span>Zone II</span><small></small></label>
-                                                <label class="zone-card active"><input type="radio" name="fa_zone_r"
-                                                        value="zone_3" checked /><span>Zone
-                                                        III</span><small></small></label>
-                                                <label class="zone-card"><input type="radio" name="fa_zone_r"
-                                                        value="zone_4" /><span>Zone IV</span><small>Fine</small></label>
+                                                <label class="zone-card">
+                                                    <input type="radio" name="fa_zone_r" value="zone_1" />
+                                                    <span>Zone I</span><small>Coarse</small>
+                                                </label>
+                                                <label class="zone-card">
+                                                    <input type="radio" name="fa_zone_r" value="zone_2" />
+                                                    <span>Zone II</span><small></small>
+                                                </label>
+                                                <label class="zone-card active">
+                                                    <input type="radio" name="fa_zone_r" value="zone_3" checked />
+                                                    <span>Zone III</span><small></small>
+                                                </label>
+                                                <label class="zone-card">
+                                                    <input type="radio" name="fa_zone_r" value="zone_4" />
+                                                    <span>Zone IV</span><small>Fine</small>
+                                                </label>
                                             </div>
                                             <input type="hidden" id="fa_zone" value="zone_3" />
-                                            <label class="form-label" style="margin-top:20px">Superplasticizer</label>
-                                            <div class="sg-list">
-                                                <div class="sg-row-w">
-                                                    <div class="sg-icon-label">💊 Dosage</div>
-                                                    <div class="sg-with-unit"><input type="number" id="admix_dosage"
-                                                            value="1.2" step="0.1" min="0.5" max="3.0"
-                                                            class="sg-num" /><span class="sg-unit">% of C</span></div>
-                                                </div>
-                                                <div class="sg-row-w">
-                                                    <div class="sg-icon-label">💧 Water reduction</div>
-                                                    <div class="sg-with-unit"><input type="number" id="admix_reduction"
-                                                            value="25" step="1" min="20" max="30" class="sg-num" /><span
-                                                            class="sg-unit">%</span></div>
+                                            <div class="admix-info-card" style="margin-top:18px">
+                                                <div class="admix-info-icon">⚗️</div>
+                                                <div class="admix-info-text">
+                                                    <strong>Superplasticizer — Auto Computed</strong>
+                                                    <span>Dosage &amp; water reduction are determined by the IS 10262:2019 Cl.5.3.2 engine automatically. No manual input required.</span>
+                                                    <div class="admix-info-chips">
+                                                        <span class="admix-chip">IS 9103:1999</span>
+                                                        <span class="admix-chip">Water reduction: 20–25%</span>
+                                                        <span class="admix-chip">Dosage: 0.8–1.5% cement</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="step-footer">
-                                    <button class="btn-back" onclick="goBack()"><span class="btn-arrow">←</span> W/C
-                                        Ratio</button>
-                                    <button class="btn-next" onclick="goNext()">Review &amp; Generate <span
-                                            class="btn-arrow">→</span></button>
+                                    <button class="btn-back" onclick="goBack()"><span class="btn-arrow">←</span> Workability</button>
+                                    <button class="btn-next" onclick="goNext()">Review &amp; Generate <span class="btn-arrow">→</span></button>
                                 </div>
                             </div>
 
-                            <!-- STEP 5: REVIEW & GENERATE -->
-                            <div class="wizard-step" id="step-5">
+                            <!-- STEP 4: REVIEW & GENERATE -->
+                            <div class="wizard-step" id="step-4">
                                 <div class="step-header">
-                                    <div class="step-eyebrow">Step 5 of 5 · Final Review</div>
+                                    <div class="step-eyebrow">Step 4 of 4 · Final Review</div>
                                     <h1 class="step-title">Review &amp; Generate Report</h1>
                                     <p class="step-desc">Confirm your inputs before running the IS 10262:2019
                                         calculation engine.</p>
@@ -1049,6 +988,50 @@
                                     <div class="rsc"><span class="rsc-l">Fine Agg</span><span class="rsc-v"
                                             id="res-fa">—</span><span class="rsc-u">kg/m³</span></div>
                                 </div>
+                                
+                                <!-- MATERIAL REQUIREMENTS HERO PANEL -->
+                                <div id="r-materials-hero">
+                                    <div class="mh-title">📊 Material Requirements <span class="mh-subtitle">per 1 m³ of concrete</span></div>
+                                    <div class="mh-grid">
+                                        <div class="mh-card mh-cement">
+                                            <div class="mh-icon">🏗️</div>
+                                            <div class="mh-label">Cement</div>
+                                            <div class="mh-value"><span id="res-mh-cement">—</span></div>
+                                            <div class="mh-unit">kg / m³</div>
+                                        </div>
+                                        <div class="mh-card mh-water">
+                                            <div class="mh-icon">💧</div>
+                                            <div class="mh-label">Water</div>
+                                            <div class="mh-value"><span id="res-mh-water">—</span></div>
+                                            <div class="mh-unit">kg / m³</div>
+                                        </div>
+                                        <div class="mh-card mh-fa">
+                                            <div class="mh-icon">🏖️</div>
+                                            <div class="mh-label">Fine Aggregate</div>
+                                            <div class="mh-value"><span id="res-mh-fa">—</span></div>
+                                            <div class="mh-unit">kg / m³</div>
+                                        </div>
+                                        <div class="mh-card mh-ca">
+                                            <div class="mh-icon">🪨</div>
+                                            <div class="mh-label">Coarse Aggregate</div>
+                                            <div class="mh-value"><span id="res-mh-ca">—</span></div>
+                                            <div class="mh-unit">kg / m³</div>
+                                        </div>
+                                        <div class="mh-card mh-admix">
+                                            <div class="mh-icon">⚗️</div>
+                                            <div class="mh-label">Superplasticizer</div>
+                                            <div class="mh-value"><span id="res-mh-admix">—</span></div>
+                                            <div class="mh-unit">kg / m³</div>
+                                        </div>
+                                        <div class="mh-card mh-wc">
+                                            <div class="mh-icon">📐</div>
+                                            <div class="mh-label">W/C Ratio</div>
+                                            <div class="mh-value"><span id="res-mh-wc">—</span></div>
+                                            <div class="mh-unit">adopted</div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="r-ratio-banner">
                                     <span class="rrb-label">Mix Proportions C : W : FA : CA</span>
                                     <span class="rrb-val" id="ratio-display">— : — : — : —</span>
