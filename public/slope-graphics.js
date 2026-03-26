@@ -10,7 +10,7 @@ class BeamGraphics {
     resize() {
         // Adjust canvas internal resolution to match display size to prevent blurring
         const rect = this.canvas.parentElement.getBoundingClientRect();
-        this.canvas.width = rect.width - 48; // accounting for padding
+        this.canvas.width = Math.max(0, rect.width - 48); // accounting for padding, min 0
         this.canvas.height = this.type === 'beam' ? 200 : 250;
     }
 
